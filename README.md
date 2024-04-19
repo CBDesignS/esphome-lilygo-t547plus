@@ -73,10 +73,10 @@ logger:
 # Enable Home Assistant API
 api:
   encryption:
-    key: "your_enc_key"
+    key: "your_enc_key" #/ when you added the lilygo t5 4.7" esp32S3 v2.3 (3 button board) to esphome it should have generated this setting and asked you to save it & esphome should have generated a basic .yaml file that has this key auto generated in it. /#
 
 ota:
-  password: "your_enc_password"
+  password: "your_ota_password" #/ when you added the lilygo t5 4.7" esp32S3 v2.3 (3 button board) to esphome it should have generated a basic .yaml file that has this password auto generated in it. /#
 
 wifi:
   ssid: !secret wifi_ssid
