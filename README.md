@@ -95,8 +95,8 @@ binary_sensor:
 
 external_components:
   source:
-    type: local #/ local folder under the esphome directory
-    path: components/
+    type: local
+    path: components/  #/ create a folder named components under the esphome directory : esphome/components then make another inside the components folder named t547 : esphome/components/t547 and copy the contents of the git folder t547 into it. /#
   components: ["t547"]
 
 captive_portal:
@@ -105,7 +105,7 @@ spi:
   mosi_pin: GPIO2
 
 font:
-  - file: "fonts/OCRAEXT.ttf" #/create a folder called fonts under the main esphome folder if you do not already have one and copy the font file OCRAEXT.ttf into it or you will error during compiling the code
+  - file: "fonts/OCRAEXT.ttf" #/ create a folder called fonts under the main esphome folder if you do not already have one and copy the font file OCRAEXT.ttf into it or you will error during compiling the code /#
     id: fontocra_large
     size: 300
   - file: "fonts/OCRAEXT.ttf"
@@ -113,7 +113,7 @@ font:
     size: 200
 
 time:
-  - platform: homeassistant
+  - platform: homeassistant #/ make sure you have the Time & Date intergration installed to Home Assistant or you will not get the correct time set after the first screen refresh. /#
     id: local_time
     timezone: Europe/London
 
