@@ -20,7 +20,7 @@ If you clone this repository, a working example is included:
     cd esphome-lilygo-t547plus
     esphome run basic.yaml
 
-If you don't want to clone, copy the necessary pieces from [clock.yaml](./clock.yaml) [components](./components) folder  & [fonts](./fonts) folder
+If you don't want to clone, copy the necessary pieces from [clock.yaml](./clock.yaml), [components](./components) folder & [fonts](./fonts) folder
 and adapt the `external_components` configuration as follows:
 
 ```yaml
