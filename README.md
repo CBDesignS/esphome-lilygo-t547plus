@@ -105,7 +105,7 @@ spi:
   mosi_pin: GPIO2
 
 font:
-  - file: "fonts/OCRAEXT.ttf"
+  - file: "fonts/OCRAEXT.ttf" #/create a folder called fonts under the main esphome folder if you do not already have one and copy the font file OCRAEXT.ttf into it or you will error during compiling the code
     id: fontocra_large
     size: 300
   - file: "fonts/OCRAEXT.ttf"
