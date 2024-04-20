@@ -24,7 +24,8 @@ If you don't want to clone, copy the necessary pieces from [clock.yaml](./clock.
 and adapt the `external_components` configuration as follows:
 
 
-![PXL_20240419_211211214](https://github.com/CBDesignS/esphome-lilygo-t547plus/assets/54717994/699e491e-31d6-4388-95b8-98c3c2f7c3d1)
+![Lilygo-t5-4 7s3](https://github.com/CBDesignS/esphome-lilygo-t547plus/assets/54717994/4ce49df6-4ba3-4dc1-8bbc-84d9ab0e87fe)
+
 
 ```yaml
 esphome:
