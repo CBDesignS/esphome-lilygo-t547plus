@@ -71,7 +71,7 @@ external_components:
   source:
     type: local
     path: components/
-  components: ["t547", "lilygo_t5_47_battery"]
+  components: ["t547", "lilygo_t5_47_battery"] # battery added from fork by kaeltis
 
 captive_portal:
 spi:
