@@ -44,10 +44,10 @@ logger:
 # Enable Home Assistant API
 api:
   encryption:
-    key: "your_enc_key" #/ when you added the lilygo t5 4.7" esp32S3 v2.3 (3 button board) to esphome it should have generated this setting and asked you to save it & esphome should have generated a basic .yaml file that has this key auto generated in it. /#
+    key: "your_enc_key"
 
 ota:
-  password: "your_ota_password" #/ when you added the lilygo t5 4.7" esp32S3 v2.3 (3 button board) to esphome it should have generated a basic .yaml file that has this password auto generated in it. /#
+  password: "your_enc_password"
 
 wifi:
   ssid: !secret wifi_ssid
@@ -70,8 +70,8 @@ binary_sensor:
 external_components:
   source:
     type: local
-    path: components/  #/ create a folder named components under the esphome directory : esphome/components then make another inside the components folder named t547 : esphome/components/t547 and copy the contents of the git folder t547 into it. /#
-  components: ["t547"]
+    path: components/
+  components: ["t547", "lilygo_t5_47_battery"]
 
 captive_portal:
 spi:
@@ -79,15 +79,18 @@ spi:
   mosi_pin: GPIO2
 
 font:
-  - file: "fonts/OCRAEXT.ttf" #/ create a folder called fonts under the main esphome folder if you do not already have one and copy the font file OCRAEXT.ttf into it or you will error during compiling the code /#
-    id: fontocra_large
+  - file: "fonts/OCRAEXT.ttf"
+    id: fontocra_300
     size: 300
   - file: "fonts/OCRAEXT.ttf"
-    id: fontocra_small
+    id: fontocra_200
     size: 200
+  - file: "fonts/OCRAEXT.ttf"
+    id: fontocra_24
+    size: 24
 
 time:
-  - platform: homeassistant #/ make sure you have the Time & Date intergration installed to Home Assistant or you will not get the correct time set after the first screen refresh. /#
+  - platform: homeassistant
     id: local_time
     timezone: Europe/London
 
@@ -96,8 +99,30 @@ display:
     # rotation: 180
     update_interval: 60s
     lambda: |-
-      it.strftime(20, 0, id(fontocra_large), TextAlign::TOP_LEFT, "%H:%M", id(local_time).now());
+      it.strftime(20, 0, id(fontocra_300), TextAlign::TOP_LEFT, "%H:%M", id(local_time).now());
       it.line(0, 50, 960, 50);
       it.line(0, 270, 960, 270);
-      it.strftime(0, 280, id(fontocra_small), TextAlign::TOP_LEFT, "%d-%m-%y", id(local_time).now());
+      it.strftime(0, 280, id(fontocra_200), TextAlign::TOP_LEFT, "%d-%m-%y", id(local_time).now());
       it.line(0, 500, 960, 500);
+      it.printf(60, 510, id(fontocra_24), TextAlign::TOP_LEFT, "Battery: %.1f%%", id(t547_battery_percentage).state);
+      it.printf(320, 510, id(fontocra_24), TextAlign::TOP_LEFT, "Voltage: %.2fV", id(t547_battery_voltage).state);
+
+sensor:
+  - platform: homeassistant
+    id: t547_battery_voltage
+    entity_id: sensor.battery_voltage
+
+  - platform: lilygo_t5_47_battery
+    id: t547_voltage
+    voltage:
+      name: "Battery Voltage"
+
+  - platform: template
+    name: "t547 Battery Percentage"
+    id: t547_battery_percentage
+    lambda: |-
+      // tweak values in mapping for calibration
+      // 4.1 = max voltage
+      // 3.3 = min voltage
+      float y = (id(t547_voltage).voltage->state - 3.3) * 100.0 / (4.1 - 3.3);
+      if (y < 100.0) { return y; } else { return 100.0; };
