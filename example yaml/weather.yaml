@@ -275,12 +275,20 @@ font:
 graph:
     - id: temp_graph
       duration: 12h
-      width: 300
+      width: 200
       height: 50
-      border: False
+      border: True
       traces:
         - sensor: out_temp
-          line_thickness: 1
+          line_thickness: 3
+    - id: humi_graph
+      duration: 12h
+      width: 200
+      height: 50
+      border: True
+      traces:
+        - sensor: out_humidity
+          line_thickness: 3
 #Display Setup
 
 display:
@@ -325,11 +333,11 @@ display:
         };
 
       // Forecast Boxes
-      it.rectangle(550,200,80,80);
-      it.rectangle(550,200,160,80);
-      it.rectangle(550,200,240,80);
-      it.rectangle(550,200,320,80);
-      it.rectangle(550,200,400,80);
+      it.rectangle(550,190,80,80);
+      it.rectangle(550,190,160,80);
+      it.rectangle(550,190,240,80);
+      it.rectangle(550,190,320,80);
+      it.rectangle(550,190,400,80);
       it.rectangle(550,340,80,80);
       it.rectangle(550,340,160,80);
       it.rectangle(550,340,240,80);
@@ -339,42 +347,55 @@ display:
       it.strftime(480, 10, id(small), TextAlign::CENTER_HORIZONTAL, "%A %B %d, %Y", id(homeassistant_time).now());
       it.strftime(480, 30, id(big), TextAlign::CENTER_HORIZONTAL, "%H:%M", id(homeassistant_time).now());
       //Current Weather
-      it.printf(400, 160, id(tiny), TextAlign::CENTER_HORIZONTAL, "Currently: %s", id(weather_now).state.c_str());
+      it.printf(400, 160, id(tiny), TextAlign::CENTER_HORIZONTAL, "Outside is: %s", id(weather_now).state.c_str());
       it.printf(400, 180, id(font_mdi_large), TextAlign::CENTER_HORIZONTAL, "%s", weather_icon_map[id(weather_now).state.c_str()].c_str());
-      //it.printf(400, 340, id(small), TextAlign::CENTER_HORIZONTAL, "%s", id(weather_now).state.c_str());
-      it.printf(400, 360, id(medium), TextAlign::CENTER_HORIZONTAL, "%.1f°", id(out_temp).state);
+      it.printf(400, 360, id(medium), TextAlign::CENTER_HORIZONTAL, "%.1fÂ°", id(out_temp).state);
       //Hourly Forecast
-      it.printf(6700,170, id(tiny), TextAlign::CENTER_HORIZONTAL, "Hourly Forecast");
-      it.printf(590,210,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_h1).state.c_str()].c_str());
-      it.printf(670,210,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_h2).state.c_str()].c_str());
-      it.printf(750,210,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_h3).state.c_str()].c_str());
-      it.printf(830,210,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_h4).state.c_str()].c_str());
-      it.printf(910,210,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_h5).state.c_str()].c_str());
-      it.printf(590,250,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0f°", id(temp_h1).state);
-      it.printf(670,250,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0f°", id(temp_h2).state);
-      it.printf(750,250,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0f°", id(temp_h3).state);
-      it.printf(830,250,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0f°", id(temp_h4).state);
-      it.printf(910,250,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0f°", id(temp_h5).state);
+      it.printf(750,160, id(tiny), TextAlign::CENTER_HORIZONTAL, "Hourly Forecast");
+      it.printf(590,270, id(tiny), TextAlign::CENTER_HORIZONTAL, "1hr");
+      it.printf(670,270, id(tiny), TextAlign::CENTER_HORIZONTAL, "2hr");
+      it.printf(750,270, id(tiny), TextAlign::CENTER_HORIZONTAL, "3hr");
+      it.printf(830,270, id(tiny), TextAlign::CENTER_HORIZONTAL, "4hr");
+      it.printf(910,270, id(tiny), TextAlign::CENTER_HORIZONTAL, "5hr");
+      it.printf(590,200,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_h1).state.c_str()].c_str());
+      it.printf(670,200,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_h2).state.c_str()].c_str());
+      it.printf(750,200,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_h3).state.c_str()].c_str());
+      it.printf(830,200,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_h4).state.c_str()].c_str());
+      it.printf(910,200,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_h5).state.c_str()].c_str());
+      it.printf(590,240,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0fÂ°", id(temp_h1).state);
+      it.printf(670,240,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0fÂ°", id(temp_h2).state);
+      it.printf(750,240,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0fÂ°", id(temp_h3).state);
+      it.printf(830,240,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0fÂ°", id(temp_h4).state);
+      it.printf(910,240,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0fÂ°", id(temp_h5).state);
       //Daily Forecast
-      it.printf(670,310, id(tiny), TextAlign::CENTER_HORIZONTAL, "Daily Forecast");
+      it.printf(750,310, id(tiny), TextAlign::CENTER_HORIZONTAL, "Daily Forecast");
+      it.printf(590,420, id(tiny), TextAlign::CENTER_HORIZONTAL, "1d");
+      it.printf(670,420, id(tiny), TextAlign::CENTER_HORIZONTAL, "2d");
+      it.printf(750,420, id(tiny), TextAlign::CENTER_HORIZONTAL, "3d");
+      it.printf(830,420, id(tiny), TextAlign::CENTER_HORIZONTAL, "4d");
+      it.printf(910,420, id(tiny), TextAlign::CENTER_HORIZONTAL, "5d");
       it.printf(590,350,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_d1).state.c_str()].c_str());
       it.printf(670,350,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_d2).state.c_str()].c_str());
       it.printf(750,350,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_d1).state.c_str()].c_str());
       it.printf(830,350,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_d4).state.c_str()].c_str());
       it.printf(910,350,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_d5).state.c_str()].c_str());
-      it.printf(590,390,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0f°", id(temp_d1).state);
-      it.printf(670,390,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0f°", id(temp_d2).state);
-      it.printf(750,390,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0f°", id(temp_d3).state);
-      it.printf(830,390,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0f°", id(temp_d4).state);
-      it.printf(910,390,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0f°", id(temp_d5).state);
-      //Outdoor Data
-      it.printf(20, 240, id(tiny), "Rain Today: %.1f°", id(out_temp).state); // change (out_temp) to (daily_rain) for the rainfall sensor once we find it 
-      it.printf(20, 270, id(tiny), "Humidity: %.1f%%", id(out_humidity).state);
-      it.printf(20, 300, id(tiny), "Wind Speed: %.1f°", id(wind_speed).state);
-      it.printf(20, 330, id(tiny), "Wind Speed: %.1f%%", id(wind_speed_gust).state);
-      it.printf(20, 360, id(tiny), "Wind Direction: %.1f°", id(wind_dir).state);
-      //it.printf(20, 390, id(tiny), "Air Pressure: %.1f°", id(air_pressure).state); // enable once air pressure sensor is active
+      it.printf(590,390,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0fÂ°", id(temp_d1).state);
+      it.printf(670,390,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0fÂ°", id(temp_d2).state);
+      it.printf(750,390,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0fÂ°", id(temp_d3).state);
+      it.printf(830,390,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0fÂ°", id(temp_d4).state);
+      it.printf(910,390,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0fÂ°", id(temp_d5).state);
+      //Outdoor Weather Data
+      it.printf(20, 240, id(tiny), "Humidity: %.1f%%", id(out_humidity).state);
+      it.printf(20, 270, id(tiny), "Wind Speed: %.1f mp/h", id(wind_speed).state);
+      it.printf(20, 300, id(tiny), "Gust Speed: %.1f mp/h", id(wind_speed_gust).state);
+      it.printf(20, 330, id(tiny), "Wind Direction: %.1fÂ°", id(wind_dir).state);
+      //it.printf(20, 360, id(tiny), "Air Pressure: %.1f hpa", id(air_pressure).state); // enable once air pressure sensor is active
       //Temp Graph
-      it.graph(500, 200, id(temp_graph));   
+      it.printf(20, 470, id(tiny), "Temperature 12hrs:-");
+      it.graph(280, 460, id(temp_graph));
+      it.printf(530, 470, id(tiny), "Humidity 12hrs:-");
+      it.graph(750, 460, id(humi_graph));
+      //Battery Stats
       it.printf(60, 510, id(fontocra_24), TextAlign::TOP_LEFT, "Battery: %.1f%%", id(t547_battery_percentage).state);
       it.printf(320, 510, id(fontocra_24), TextAlign::TOP_LEFT, "Voltage: %.2fV", id(battery_voltage).state);
+      //it.printf(320, 510, id(fontocra_24), TextAlign::TOP_LEFT, "Wifi AP: %.2fV", id(t547_wifi).state);
