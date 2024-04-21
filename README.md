@@ -14,14 +14,11 @@ number of options in your esphome config**:
 * Set a bunch of `platformio_options`
 * Include the component from this repository as `external_components` 
 
-If you clone this repository, a working example is included:
+If you clone this repository, There are working examples included in the: [example_yaml](./example_yaml) folder
 
-    git clone https://github.com/nickolay/esphome-lilygo-t547plus.git
-    cd esphome-lilygo-t547plus
-    esphome run basic.yaml
-
-If you don't want to clone, copy the necessary pieces from [clock.yaml](./clock.yaml), [components](./components) folder & [fonts](./fonts) folder
-and adapt the `external_components` configuration as follows:
+You will find A Basic working [basic.yaml](./example_yaml/basic.yaml), [components](./components) folder & [fonts](./fonts) folder
+You will find A Basic working [clock.yaml](./example_yaml/clock.yaml), [components](./components) folder & [fonts](./fonts) folder
+You will find A Basic working [Weather.yaml](./example_yaml/Weather.yaml), [components](./components) folder & [fonts](./fonts) folder
 
 Basic Clock .
 ![Lilygo-t5-4 7s3](https://github.com/CBDesignS/esphome-lilygo-t547plus/assets/54717994/4ce49df6-4ba3-4dc1-8bbc-84d9ab0e87fe)
