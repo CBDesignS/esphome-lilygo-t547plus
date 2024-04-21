@@ -22,7 +22,7 @@ If you clone this repository, There are working examples included in the: [examp
 2. You will find A Basic working [clock.yaml](./example_yaml/clock.yaml), [components](./components) folder & [fonts](./fonts) folder
 3. You will find A Basic working [Weather.yaml](./example_yaml/Weather.yaml), [components](./components) folder & [fonts](./fonts) folder
 
-# Basic Clock .#
+# Basic Clock. #
 ![Lilygo-t5-4 7s3](https://github.com/CBDesignS/esphome-lilygo-t547plus/assets/54717994/4ce49df6-4ba3-4dc1-8bbc-84d9ab0e87fe)
 
 # Home Assistant Weather Station. #
