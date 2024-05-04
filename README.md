@@ -30,7 +30,8 @@ The examples below are for EspHome that read data from a working Home Assistant 
 ![Lilygo-t5-4 7s3](https://github.com/CBDesignS/esphome-lilygo-t547plus/assets/54717994/4ce49df6-4ba3-4dc1-8bbc-84d9ab0e87fe)
 
 # Home Assistant Weather Station. #
-![HA weather](https://github.com/CBDesignS/esphome-lilygo-t547plus/assets/54717994/14d6f0e8-eef7-4223-9e06-b071feb0ee01)
+![HA weather v2](https://github.com/CBDesignS/esphome-lilygo-t547plus/assets/54717994/dae11905-bf54-4ed1-8ff6-ddc6d275cd2f)
+
 
 ```
 
