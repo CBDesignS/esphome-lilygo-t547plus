@@ -47,16 +47,27 @@ api:
     key: "your_enc_key"
 
 ota:
-  password: "your_enc_password"
+  password: "your_ota_passkey"
+
+web_server: # so you see the data and monitor the sensor updates from inside the esphome dashboard
+  port: 80
 
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
+// change settings to define a static ip for your device if required, if not comment the next 6 lines out for dhcp
+  manual_ip:
+    # Set this to the IP of the ESP to give it a fixed static local ip address
+    static_ip: 192.168.1.226
+    gateway: 192.168.1.1
+    subnet: 255.255.255.0
+    dns1: 192.168.1.1
+  power_save_mode: LIGHT
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
-    ssid: "E-Paper Fallback Hotspot"
-    password: "esphome123"
+    ssid: "E-Paper-Weather Fallback Hotspot"
+    password: "BvLrX4xYWoIU"
 
 binary_sensor:
   - platform: gpio
@@ -65,7 +76,18 @@ binary_sensor:
       inverted: true
     name: "Button 1"
     on_press:
-      - logger.log: PhysButton Pressed
+      - logger.log: PhysButton Pressed # - component.update: t5_display this maybe forces a refresh & update ??
+ 
+  - platform: homeassistant
+    id: t547_battery_voltage
+    entity_id: sensor.T547_battery_voltage
+
+  - platform: status
+    name: "Status"
+  - platform: homeassistant
+    name: "OTA Mode"
+    id: otamode
+    entity_id: input_boolean.display_ota_mode 
 
 external_components:
   source:
@@ -73,17 +95,47 @@ external_components:
     path: components/
   components: ["t547", "lilygo_t5_47_battery"]
 
+i2c:
+  - id: bus_a
+    sda: GPIO18
+    scl: GPIO17
+    frequency: 100khz
+    # There is some problems with i2c scan so turn scan off if problem appear on your board
+    scan: False
+ 
+time:
+  - platform: pcf8563
+    id: internal_clock
+    address: 0x51  
+    i2c_id: bus_a
+  - platform: homeassistant
+    id: ha_time
+    on_time_sync:
+      then:
+        - pcf8563.write_time
+
+## Only needed if powered via battery ##
+#deep_sleep:
+#  run_duration: ${run_time}
+#  sleep_duration: ${sleep_time}
+#  id: deep_sleep_1
+#  esp32_ext1_wakeup:
+#    pins: GPIO39
+#    mode: ALL_LOW
+#    allow_other_uses: true
+## -- ##
+
 captive_portal:
 
 sensor:
   - platform: homeassistant
-    id: battery_voltage
-    entity_id: sensor.battery_voltage
+    id: t547_voltage
+    entity_id: sensor.T547_battery_voltage
 
   - platform: lilygo_t5_47_battery
-    id: t547_voltage
+    id: t547_Battery_voltage
     voltage:
-      name: "Battery Voltage"
+      name: "t547 Battery Voltage"
 
   - platform: template
     name: "t547 Battery Percentage"
@@ -92,7 +144,7 @@ sensor:
       // tweak values in mapping for calibration
       // 4.1 = max voltage
       // 3.3 = min voltage
-      float y = (id(t547_voltage).voltage->state - 3.3) * 100.0 / (4.1 - 3.3);
+      float y = (id(t547_Battery_voltage).voltage->state - 3.3) * 100.0 / (4.1 - 3.3);
       if (y < 100.0) { return y; } else { return 100.0; };
 
   - platform: homeassistant
@@ -111,13 +163,9 @@ sensor:
     id: wind_speed_gust
     entity_id: sensor.fineoffset_wind_gust_average_mph
 
-#  - platform: homeassistant
-#    id: daily_rain
-#    entity_id: sensor.daily_rain
-
-#  - platform: homeassistant
-#    id: air_pressure
-#    entity_id: sensor.air_pressure
+  - platform: homeassistant
+    id: air_pressure
+    entity_id: sensor.esp8266_bmp280_air_pressure
 
   - platform: homeassistant
     id: temp_h1
@@ -159,7 +207,28 @@ sensor:
     id: temp_d5
     entity_id: sensor.temperature_forecast_d5
 
+  - platform: homeassistant
+    id: rain_h1
+    entity_id: sensor.rain_forecast_h1
+
+  - platform: homeassistant
+    id: rain_h2
+    entity_id: sensor.rain_forecast_h2
+
+  - platform: homeassistant
+    id: rain_h3
+    entity_id: sensor.rain_forecast_h3
+
+  - platform: homeassistant
+    id: rain_h4
+    entity_id: sensor.rain_forecast_h4
+
+  - platform: homeassistant
+    id: rain_h5
+    entity_id: sensor.rain_forecast_h5
+
 text_sensor:
+  
   - platform: homeassistant
     id: wind_dir
     entity_id: sensor.cardinal_wind_dir
@@ -208,6 +277,32 @@ text_sensor:
     id: weather_d5
     entity_id: sensor.weather_forecast_d5
 
+  - platform: homeassistant
+    id: moon_phase
+    entity_id: sensor.moon_phase
+
+  - platform: homeassistant
+    id: wifi_ssid_text
+    entity_id: sensor.lilygo_weather_esp_connected_ssid
+
+  - platform: homeassistant
+    id: wifi_ip_text
+    entity_id: sensor.lilygo_weather_esp_ip_address
+
+  - platform: wifi_info
+    ip_address:
+      name: ESP IP Address
+    ssid:
+      name: ESP Connected SSID
+    bssid:
+      name: ESP Connected BSSID
+    mac_address:
+      name: ESP Mac Wifi Address
+    scan_results:
+      name: ESP Latest Scan Results
+    dns_address:
+      name: ESP DNS Address
+
 button:
   - platform: restart
     name: "Dashboard - Restart"
@@ -215,7 +310,7 @@ button:
 font:
   - file: "gfonts://Inter@900"
     id: big
-    size: 120
+    size: 100
   - file: "gfonts://Inter@900"
     id: medium
     size: 60
@@ -232,8 +327,8 @@ font:
   # Include Material Design Icons font
   # Thanks to https://community.home-assistant.io/t/display-materialdesign-icons-on-esphome-attached-to-screen/199790/16
   - file: 'fonts/materialdesignicons-webfont.ttf'
-    id: font_mdi_large
-    size: 200
+    id: font_mdi_160
+    size: 160
     glyphs: &mdi-weather-glyphs
       - "\U000F0590" # mdi-weather-cloudy
       - "\U000F0F2F" # mdi-weather-cloudy-alert
@@ -265,11 +360,30 @@ font:
       - "\U000F0F38" # mdi-weather-tornado
       - "\U000F059D" # mdi-weather-windy
       - "\U000F059E" # mdi-weather-windy-variant
+      - "\U000F0F61" # moon-first-quarter
+      - "\U000F0F62" # moon-full
+      - "\U000F0F63" # moon-last-quarter
+      - "\U000F0F64" # moon-new
+      - "\U000F0F65" # moon-waning-crescent
+      - "\U000F0F66" # moon-waning-gibbous
+      - "\U000F0F67" # moon-waxing-crescent
+      - "\U000F0F68" # moon-waxing-gibbous
+
   - file: 'fonts/materialdesignicons-webfont.ttf'
-    id: font_mdi_medium
-    size: 40
+    id: font_moon_130
+    size: 130
     glyphs: *mdi-weather-glyphs
 
+  - file: 'fonts/materialdesignicons-webfont.ttf'
+    id: font_mdi_100
+    size: 100
+    glyphs: *mdi-weather-glyphs
+
+  - file: 'fonts/materialdesignicons-webfont.ttf'
+    id: font_mdi_40
+    size: 40
+    bpp: 4
+    glyphs: *mdi-weather-glyphs
 
 #Make Temp Graph
 graph:
@@ -298,7 +412,7 @@ display:
 
     lambda: |-
       // Map weather states to MDI characters.
-      std::map<std::string, std::string> weather_icon_map
+      std::map<std::string, std::string> icon_map
         {
           {"cloudy", "\U000F0590"},
           {"cloudy-alert", "\U000F0F2F"},
@@ -330,26 +444,49 @@ display:
           {"tornado", "\U000F0F38"},
           {"windy", "\U000F059D"},
           {"windy-variant", "\U000F059E"},
+
+        };
+
+      std::map<std::string, std::string> moon_icon_map
+        {
+          {"first_quarter", "\U000F0F61"},
+          {"full_moon", "\U000F0F62"},
+          {"last_quarter", "\U000F0F63"},
+          {"new_moon", "\U000F0F64"},
+          {"waning_crescent", "\U000F0F65"},
+          {"waning_gibbous", "\U000F0F66"},
+          {"waning_crescent", "\U000F0F67"},
+          {"waxing_gibbous", "\U000F0F68"},
+          
         };
 
       // Forecast Boxes
-      it.rectangle(550,190,80,80);
-      it.rectangle(550,190,160,80);
-      it.rectangle(550,190,240,80);
-      it.rectangle(550,190,320,80);
-      it.rectangle(550,190,400,80);
-      it.rectangle(550,340,80,80);
-      it.rectangle(550,340,160,80);
-      it.rectangle(550,340,240,80);
-      it.rectangle(550,340,320,80);
-      it.rectangle(550,340,400,80);
+      it.rectangle(550,40,80,80); // Hourly rain forecast box
+      it.rectangle(550,40,160,80); // Hourly rain forecast box
+      it.rectangle(550,40,240,80); // Hourly rain forecast box
+      it.rectangle(550,40,320,80); // Hourly rain forecast box
+      it.rectangle(550,40,400,80); // Hourly rain forecast box
+      it.rectangle(550,190,80,80); // Hourly forecast box
+      it.rectangle(550,190,160,80); // Hourly forecast box
+      it.rectangle(550,190,240,80); // Hourly forecast box
+      it.rectangle(550,190,320,80); // Hourly forecast box
+      it.rectangle(550,190,400,80); // Hourly forecast box
+      it.rectangle(550,340,80,80); // Daily forecast box
+      it.rectangle(550,340,160,80); // Daily forecast box
+      it.rectangle(550,340,240,80); // Daily forecast box
+      it.rectangle(550,340,320,80); // Daily forecast box
+      it.rectangle(550,340,400,80); // Daily forecast box
       //Date and Time
-      it.strftime(480, 10, id(small), TextAlign::CENTER_HORIZONTAL, "%A %B %d, %Y", id(homeassistant_time).now());
-      it.strftime(480, 30, id(big), TextAlign::CENTER_HORIZONTAL, "%H:%M", id(homeassistant_time).now());
+      it.strftime(360, 10, id(small), TextAlign::CENTER_HORIZONTAL, "%A %B %d, %Y", id(internal_clock).now());
+      it.strftime(360, 30, id(big), TextAlign::CENTER_HORIZONTAL, "%H:%M", id(internal_clock).now());
       //Current Weather
-      it.printf(400, 160, id(tiny), TextAlign::CENTER_HORIZONTAL, "Outside is: %s", id(weather_now).state.c_str());
-      it.printf(400, 180, id(font_mdi_large), TextAlign::CENTER_HORIZONTAL, "%s", weather_icon_map[id(weather_now).state.c_str()].c_str());
-      it.printf(400, 360, id(medium), TextAlign::CENTER_HORIZONTAL, "%.1f°", id(out_temp).state);
+      it.printf(410, 180, id(tiny), TextAlign::CENTER_HORIZONTAL, "Outside is: %s", id(weather_now).state.c_str());
+      it.printf(410, 200, id(font_mdi_160), TextAlign::CENTER_HORIZONTAL, "%s",icon_map[id(weather_now).state.c_str()].c_str());
+      it.printf(410, 360, id(medium), TextAlign::CENTER_HORIZONTAL, "%.1f°", id(out_temp).state);
+      // Moon Phase
+      it.circle(110, 90, 55);
+      it.printf(110, 25, id(font_moon_130), TextAlign::CENTER_HORIZONTAL, "%s",moon_icon_map[id(moon_phase).state.c_str()].c_str());
+      it.printf(110, 170, id(tiny), TextAlign::CENTER_HORIZONTAL, "%s", id(moon_phase).state.c_str());
       //Hourly Forecast
       it.printf(750,160, id(tiny), TextAlign::CENTER_HORIZONTAL, "Hourly Forecast");
       it.printf(590,270, id(tiny), TextAlign::CENTER_HORIZONTAL, "1hr");
@@ -357,16 +494,33 @@ display:
       it.printf(750,270, id(tiny), TextAlign::CENTER_HORIZONTAL, "3hr");
       it.printf(830,270, id(tiny), TextAlign::CENTER_HORIZONTAL, "4hr");
       it.printf(910,270, id(tiny), TextAlign::CENTER_HORIZONTAL, "5hr");
-      it.printf(590,200,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_h1).state.c_str()].c_str());
-      it.printf(670,200,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_h2).state.c_str()].c_str());
-      it.printf(750,200,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_h3).state.c_str()].c_str());
-      it.printf(830,200,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_h4).state.c_str()].c_str());
-      it.printf(910,200,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_h5).state.c_str()].c_str());
+      it.printf(590,200,id(font_mdi_40),TextAlign::CENTER_HORIZONTAL,"%s",icon_map[id(weather_h1).state.c_str()].c_str());
+      it.printf(670,200,id(font_mdi_40),TextAlign::CENTER_HORIZONTAL,"%s",icon_map[id(weather_h2).state.c_str()].c_str());
+      it.printf(750,200,id(font_mdi_40),TextAlign::CENTER_HORIZONTAL,"%s",icon_map[id(weather_h3).state.c_str()].c_str());
+      it.printf(830,200,id(font_mdi_40),TextAlign::CENTER_HORIZONTAL,"%s",icon_map[id(weather_h4).state.c_str()].c_str());
+      it.printf(910,200,id(font_mdi_40),TextAlign::CENTER_HORIZONTAL,"%s",icon_map[id(weather_h5).state.c_str()].c_str());
       it.printf(590,240,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0f°", id(temp_h1).state);
       it.printf(670,240,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0f°", id(temp_h2).state);
       it.printf(750,240,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0f°", id(temp_h3).state);
       it.printf(830,240,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0f°", id(temp_h4).state);
       it.printf(910,240,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0f°", id(temp_h5).state);
+      //Hourly Rain Forecast
+      it.printf(750,10, id(tiny), TextAlign::CENTER_HORIZONTAL, "Hourly Rain Forecast");
+      it.printf(590,120, id(tiny), TextAlign::CENTER_HORIZONTAL, "1hr");
+      it.printf(670,120, id(tiny), TextAlign::CENTER_HORIZONTAL, "2hr");
+      it.printf(750,120, id(tiny), TextAlign::CENTER_HORIZONTAL, "3hr");
+      it.printf(830,120, id(tiny), TextAlign::CENTER_HORIZONTAL, "4hr");
+      it.printf(910,120, id(tiny), TextAlign::CENTER_HORIZONTAL, "5hr");
+      it.printf(590,50,id(font_mdi_40),TextAlign::CENTER_HORIZONTAL,"%s",icon_map[id(weather_h1).state.c_str()].c_str());
+      it.printf(670,50,id(font_mdi_40),TextAlign::CENTER_HORIZONTAL,"%s",icon_map[id(weather_h2).state.c_str()].c_str());
+      it.printf(750,50,id(font_mdi_40),TextAlign::CENTER_HORIZONTAL,"%s",icon_map[id(weather_h3).state.c_str()].c_str());
+      it.printf(830,50,id(font_mdi_40),TextAlign::CENTER_HORIZONTAL,"%s",icon_map[id(weather_h4).state.c_str()].c_str());
+      it.printf(910,50,id(font_mdi_40),TextAlign::CENTER_HORIZONTAL,"%s",icon_map[id(weather_h5).state.c_str()].c_str());
+      it.printf(590,90,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.1f", id(rain_h1).state);
+      it.printf(670,90,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.1f", id(rain_h2).state);
+      it.printf(750,90,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.1f", id(rain_h3).state);
+      it.printf(830,90,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.1f", id(rain_h4).state);
+      it.printf(910,90,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.1f", id(rain_h5).state);
       //Daily Forecast
       it.printf(750,310, id(tiny), TextAlign::CENTER_HORIZONTAL, "Daily Forecast");
       it.printf(590,420, id(tiny), TextAlign::CENTER_HORIZONTAL, "1d");
@@ -374,11 +528,11 @@ display:
       it.printf(750,420, id(tiny), TextAlign::CENTER_HORIZONTAL, "3d");
       it.printf(830,420, id(tiny), TextAlign::CENTER_HORIZONTAL, "4d");
       it.printf(910,420, id(tiny), TextAlign::CENTER_HORIZONTAL, "5d");
-      it.printf(590,350,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_d1).state.c_str()].c_str());
-      it.printf(670,350,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_d2).state.c_str()].c_str());
-      it.printf(750,350,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_d1).state.c_str()].c_str());
-      it.printf(830,350,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_d4).state.c_str()].c_str());
-      it.printf(910,350,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_d5).state.c_str()].c_str());
+      it.printf(590,350,id(font_mdi_40),TextAlign::CENTER_HORIZONTAL,"%s",icon_map[id(weather_d1).state.c_str()].c_str());
+      it.printf(670,350,id(font_mdi_40),TextAlign::CENTER_HORIZONTAL,"%s",icon_map[id(weather_d2).state.c_str()].c_str());
+      it.printf(750,350,id(font_mdi_40),TextAlign::CENTER_HORIZONTAL,"%s",icon_map[id(weather_d1).state.c_str()].c_str());
+      it.printf(830,350,id(font_mdi_40),TextAlign::CENTER_HORIZONTAL,"%s",icon_map[id(weather_d4).state.c_str()].c_str());
+      it.printf(910,350,id(font_mdi_40),TextAlign::CENTER_HORIZONTAL,"%s",icon_map[id(weather_d5).state.c_str()].c_str());
       it.printf(590,390,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0f°", id(temp_d1).state);
       it.printf(670,390,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0f°", id(temp_d2).state);
       it.printf(750,390,id(tiny),TextAlign::CENTER_HORIZONTAL, "%.0f°", id(temp_d3).state);
@@ -388,14 +542,15 @@ display:
       it.printf(20, 240, id(tiny), "Humidity: %.1f%%", id(out_humidity).state);
       it.printf(20, 270, id(tiny), "Wind Speed: %.1f mp/h", id(wind_speed).state);
       it.printf(20, 300, id(tiny), "Gust Speed: %.1f mp/h", id(wind_speed_gust).state);
-      it.printf(20, 330, id(tiny), "Wind Direction: %.1f°", id(wind_dir).state);
-      //it.printf(20, 360, id(tiny), "Air Pressure: %.1f hpa", id(air_pressure).state); // enable once air pressure sensor is active
+      it.printf(20, 330, id(tiny), "Wind Direction: %s", id(wind_dir).state.c_str());
+      it.printf(20, 360, id(tiny), "Pressure: %.1f hpa", id(air_pressure).state);
       //Temp Graph
       it.printf(20, 470, id(tiny), "Temperature 12hrs:-");
       it.graph(280, 460, id(temp_graph));
       it.printf(530, 470, id(tiny), "Humidity 12hrs:-");
       it.graph(750, 460, id(humi_graph));
-      //Battery Stats
-      it.printf(60, 510, id(fontocra_24), TextAlign::TOP_LEFT, "Battery: %.1f%%", id(t547_battery_percentage).state);
-      it.printf(320, 510, id(fontocra_24), TextAlign::TOP_LEFT, "Voltage: %.2fV", id(battery_voltage).state);
-      //it.printf(320, 510, id(fontocra_24), TextAlign::TOP_LEFT, "Wifi AP: %.2fV", id(t547_wifi).state);
+      //System Info
+      it.printf(10, 510, id(fontocra_24), TextAlign::TOP_LEFT, "Battery: %.0f%%", id(t547_battery_percentage).state);
+      it.printf(240, 510, id(fontocra_24), TextAlign::TOP_LEFT, "Volts: %.1fV", id(t547_voltage).state);
+      it.printf(460, 510, id(fontocra_24), TextAlign::TOP_LEFT, "Wifi: %s", id(wifi_ssid_text).state.c_str());
+      it.printf(750, 510, id(fontocra_24), TextAlign::TOP_LEFT, "%s", id(wifi_ip_text).state.c_str());
