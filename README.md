@@ -24,7 +24,7 @@ If you clone this repository, There are working examples included in the: [examp
 
 The examples below are for EspHome that read data from a working Home Assistant installation
 1. You will find A Basic working [clock.yaml](./example_yaml/clock.yaml), required files are in th [components](./components) folder & [fonts](./fonts) folder
-2. You will find A Basic working [Weather.yaml](./example_yaml/Weather.yaml), required files are in the [components](./components) folder & [fonts](./fonts) folder
+2. You will find my HA Weather Station [Weather.yaml](./example_yaml/Weather.yaml), required files are in the [components](./components) folder & [fonts](./fonts) folder & 3D STL Housing files [housing](./housing) folder
 
 # Basic Clock. #
 ![Lilygo-t5-4 7s3](https://github.com/CBDesignS/esphome-lilygo-t547plus/assets/54717994/4ce49df6-4ba3-4dc1-8bbc-84d9ab0e87fe)
