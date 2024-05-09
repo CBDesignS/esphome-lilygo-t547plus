@@ -68,7 +68,6 @@ wifi:
   ap:
     ssid: "E-Paper-Weather Fallback Hotspot"
     password: "BvLrX4xYWoIU"
-
 binary_sensor:
   - platform: gpio
     pin: 
@@ -90,10 +89,10 @@ binary_sensor:
     entity_id: input_boolean.display_ota_mode 
 
 external_components:
-  source:
-    type: local
-    path: components/
-  components: ["t547", "lilygo_t5_47_battery"]
+  - source: github://bvarick/esphome-lilygo-t547plus
+    components: ["t547"]
+  - source: github://kaeltis/esphome-lilygo-t547plus
+    components: ["lilygo_t5_47_battery"]
 
 i2c:
   - id: bus_a
@@ -282,6 +281,10 @@ text_sensor:
     entity_id: sensor.moon_phase
 
   - platform: homeassistant
+    id: moon_set
+    entity_id: sensor.astroweather_moon_next_setting
+
+  - platform: homeassistant
     id: wifi_ssid_text
     entity_id: sensor.lilygo_weather_esp_connected_ssid
 
@@ -403,8 +406,22 @@ graph:
       traces:
         - sensor: out_humidity
           line_thickness: 3
+          
+# Define colors
+# This design is white on black so this is necessary.
+color:
+  - id: color_black
+    red: 0%
+    green: 0%
+    blue: 0%
+    white: 0%
+  - id: color_white
+    red: 0%
+    green: 0%
+    blue: 0%
+    white: 50%
+          
 #Display Setup
-
 display:
   - platform: t547
     # rotation: 180
@@ -460,6 +477,9 @@ display:
           
         };
 
+      // Fill background in black.
+      //it.filled_rectangle(0,0,960,540); // try to reset screen to full black if works then comment out to return to normal mode after reflashing.
+
       // Forecast Boxes
       it.rectangle(550,40,80,80); // Hourly rain forecast box
       it.rectangle(550,40,160,80); // Hourly rain forecast box
@@ -486,7 +506,8 @@ display:
       // Moon Phase
       it.circle(110, 90, 55);
       it.printf(110, 25, id(font_moon_130), TextAlign::CENTER_HORIZONTAL, "%s",moon_icon_map[id(moon_phase).state.c_str()].c_str());
-      it.printf(110, 170, id(tiny), TextAlign::CENTER_HORIZONTAL, "%s", id(moon_phase).state.c_str());
+      it.printf(110, 150, id(tiny), TextAlign::CENTER_HORIZONTAL, "%s", id(moon_phase).state.c_str());
+      //it.printf(110, 170, id(tiny), TextAlign::CENTER_HORIZONTAL, "%s", id(moon_set).state.c_str());
       //Hourly Forecast
       it.printf(750,160, id(tiny), TextAlign::CENTER_HORIZONTAL, "Hourly Forecast");
       it.printf(590,270, id(tiny), TextAlign::CENTER_HORIZONTAL, "1hr");
