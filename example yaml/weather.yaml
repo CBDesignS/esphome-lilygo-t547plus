@@ -455,7 +455,7 @@ display:
           {"new_moon", "\U000F0F64"},
           {"waning_crescent", "\U000F0F65"},
           {"waning_gibbous", "\U000F0F66"},
-          {"waning_crescent", "\U000F0F67"},
+          {"waxing_crescent", "\U000F0F67"},
           {"waxing_gibbous", "\U000F0F68"},
           
         };
